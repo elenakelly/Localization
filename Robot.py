@@ -42,9 +42,10 @@ class RobotMove:
             
             self.v = 0  #translated velocity
             self.w = 0 #angular velocitty
-            self.speed = 0.001
-            self.side = 0.01
-            self.theta = -math.pi/2
+            self.speed = 1
+            self.side = 0.001
+            self.theta = 0
+            #self.theta = -math.pi/2
             self.sensor_limit = 200
 
             
@@ -78,7 +79,7 @@ class RobotMove:
                 self.v = 0
                 self.w = 0
             
-            next_x, next_y = self.x, self.y
+            #next_x, next_y = self.x, self.y
 
             # check model
             if self.v != 0 or self.w != 0:
@@ -91,7 +92,7 @@ class RobotMove:
                 a =[self.x,self.y,self.theta]              
                 b = [[dt*math.cos(self.theta), 0],
                  [dt*math.sin(self.theta), 0],
-                 [ 0 , dt]]     
+                 [ 0 , dt]]
                 c =[self.v, self.w]
                 rotation = np.dot(b, c)
                 M = a + rotation
@@ -104,72 +105,27 @@ class RobotMove:
                 # DRAW LINE MOVE VECTOR
                 pygame.display.flip()
 
-                next_x = M[0]-(ROBOT.get_width()/2)
-                next_y = M[1]-(ROBOT.get_height()/2)
+                #next_x = M[0]-(ROBOT.get_width()/2)
+                #next_y = M[1]-(ROBOT.get_height()/2)
+                next_x = M[0]
+                next_y = M[1]
                 # print("-")
-                self.theta = M[2]
+                new_theta = M[2]
+                
+                self.x = next_x
+                self.y = next_y
+                self.theta = new_theta
 
             self.rotated = pygame.transform.rotozoom(
                 self.img, math.degrees(self.theta), 1)
+            
     
         def upd_rect(self):
             self.rect.x = self.x
             self.rect.y = self.y
 
 # Raycasting
-def cast_rays(screen, walls):
 
-    all_sensors = []
-
-    sensor_x = player_robot.x+(ROBOT.get_width()/2)
-    sensor_y = player_robot.y+(ROBOT.get_height()/2)
-
-    temp_angle = 0
-    for i in range(12):
-        all_sensors.append((sensor_x, sensor_y, temp_angle, temp_angle, i))
-        temp_angle += STEP_ANGLE
-
-    for sensor in all_sensors:
-
-        clipped_line = None
-
-        sensor_placement_offset = 8
-        sensor_placement_radius_depth = 64
-        sensor_placement_x = sensor[0] - math.sin(
-            sensor[2]) * sensor_placement_radius_depth - sensor_placement_offset
-        sensor_placement_y = sensor[1] + math.cos(
-            sensor[3]) * sensor_placement_radius_depth - sensor_placement_offset
-        collision_offset = 32
-
-        for depth in range(200):
-            target_x = sensor[0] - math.sin(sensor[2]) * depth
-            target_y = sensor[1] + math.cos(sensor[3]) * depth
-
-            ray = ((sensor_x, sensor_y), (target_x, target_y))
-
-            detected = []
-
-            for i in range(len(walls)):
-                clipped_line = walls[i].clipline(ray)
-                if clipped_line:
-                    detected.append(clipped_line)
-
-        sensor_distance = 200
-        if detected:
-            for line in detected:
-                temp_sensor_distance = int(
-                    math.sqrt((line[0][1]-sensor_y)**2 + (line[0][0]-sensor_x)**2))-collision_offset
-                if temp_sensor_distance < sensor_distance:
-                    sensor_distance = temp_sensor_distance
-                    clipped_line = line
-
-            pygame.draw.line(screen, (255, 130, 100), (sensor_x, sensor_y),
-                             (clipped_line[0][0], clipped_line[0][1]), 3)
-
-        sensor_text = SENSORS_FONT.render(
-            f"{sensor_distance}", 1, (255, 255, 255))
-        screen.blit(
-            sensor_text, (sensor_placement_x, sensor_placement_y))
 
     # ------------
 
@@ -187,6 +143,7 @@ class Envir:
         # colors
         self.black = (0, 0, 0)
         self.white = (255, 255, 255)
+        self.gray = (49, 60, 60)
         # map_dims
         self.height = dimension[0]
         self.width = dimension[1]
@@ -272,7 +229,7 @@ for wall in wall_list:
     walls.append(wall.rect)
 
 # dt
-dt = 50
+dt = 0.1
 clock = pygame.time.Clock()
 FPS = 60
 
@@ -306,7 +263,7 @@ while run:
     player_robot.upd_rect()
     player_robot.draw(environment.map)
 
-    cast_rays(SCREEN, walls)
+    #cast_rays(SCREEN, walls)
 
     # ---
 
