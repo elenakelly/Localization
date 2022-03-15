@@ -126,6 +126,59 @@ class RobotMove:
 
 # Raycasting
 
+def cast_rays(screen, walls):
+
+    all_sensors = []
+
+    sensor_x = player_robot.x+(ROBOT.get_width()/2)
+    sensor_y = player_robot.y+(ROBOT.get_height()/2)
+
+    temp_angle = 0
+    for i in range(12):
+        all_sensors.append((sensor_x, sensor_y, temp_angle, temp_angle, i))
+        temp_angle += STEP_ANGLE
+
+    for sensor in all_sensors:
+
+        clipped_line = None
+
+        sensor_placement_offset = 8
+        sensor_placement_radius_depth = 64
+        sensor_placement_x = sensor[0] - math.sin(
+            sensor[2]) * sensor_placement_radius_depth - sensor_placement_offset
+        sensor_placement_y = sensor[1] + math.cos(
+            sensor[3]) * sensor_placement_radius_depth - sensor_placement_offset
+        collision_offset = 32
+
+        for depth in range(200):
+            target_x = sensor[0] - math.sin(sensor[2]) * depth
+            target_y = sensor[1] + math.cos(sensor[3]) * depth
+
+            ray = ((sensor_x, sensor_y), (target_x, target_y))
+
+            detected = []
+
+            for i in range(len(walls)):
+                clipped_line = walls[i].clipline(ray)
+                if clipped_line:
+                    detected.append(clipped_line)
+
+        sensor_distance = 200
+        if detected:
+            for line in detected:
+                temp_sensor_distance = int(
+                    math.sqrt((line[0][1]-sensor_y)**2 + (line[0][0]-sensor_x)**2))-collision_offset
+                if temp_sensor_distance < sensor_distance:
+                    sensor_distance = temp_sensor_distance
+                    clipped_line = line
+
+            pygame.draw.line(screen, (255, 130, 100), (sensor_x, sensor_y),
+                             (clipped_line[0][0], clipped_line[0][1]), 3)
+
+        sensor_text = SENSORS_FONT.render(
+            f"{sensor_distance}", 1, (255, 255, 255))
+        screen.blit(
+            sensor_text, (sensor_placement_x, sensor_placement_y))
 
     # ------------
 
@@ -188,6 +241,9 @@ class Envir:
         # display robot on screen
         player_robot.draw(screen)
         # pygame.display.update()
+        wall_points =[(30, 170),(400, 170),(170, 330),(570,330),(170, 580),(350, 500),(350,750)]
+        for beacons in wall_points:
+            pygame.draw.circle(SCREEN,(255,255,255),beacons, 5)
 
     def setWalls():
         wall_pixel_offset = 42

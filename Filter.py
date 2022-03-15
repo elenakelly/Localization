@@ -6,10 +6,7 @@ class KalmanFilter:
         self.A = 0
         self.B = 0
         self.C = 0 
-        self.e = 0
-        
-
-        
+        self.e = 0        
         pass
     def localization(self):
         pass
