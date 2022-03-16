@@ -241,9 +241,9 @@ class Envir:
         # display robot on screen
         player_robot.draw(screen)
         # pygame.display.update()
-        wall_points =[(30, 170),(400, 170),(170, 330),(570,330),(170, 580),(350, 500),(350,750)]
-        for beacons in wall_points:
-            pygame.draw.circle(SCREEN,(255,255,255),beacons, 5)
+        wall_list2 =[(30, 170),(400, 170),(170, 330),(570,330),(170, 580),(350, 500),(350,750),(32,746),(32,54),(568,54),(568,746)]
+        for beacons in wall_list2:
+            pygame.draw.circle(SCREEN,(0, 0, 0),beacons, 7)
 
     def setWalls():
         wall_pixel_offset = 42
