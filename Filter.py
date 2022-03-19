@@ -24,23 +24,23 @@ class KalmanFilter:
         print(self.C)
       
     def prediction(self):
-
         #state prediction
         self.m = np.matmul(self.A , self.state) + np.matmul(self.B , self.u)
         #covariance prediction
-        self.S = np.matmul(np.matmul(self.A, self.S), self.A) + self.R
+        self.S = np.matmul(np.matmul(self.A, np.transpose(self.S)), self.A) + self.R
 
     def correction(self,z):
         #get z and C from the sensors
         # z = [x,y,theta]
-
-        a = np.matmul(np.matmul(self.C,S), self.C) + self.Q
+        a = np.matmul(np.matmul(self.C,S), np.transpose(self.C)) + self.Q
         a1 = np.linalg.matrix_power(a, -1)
-        K = np.matmul(np.matmul(S,self.C), a1)
+        K = np.matmul(np.matmul(S,np.transpose(self.C)), a1)
         #new state
         m = self.m +np.matmul(K,(z - np.matmul(self.C,self.m)))
         #new covariance
         S = np.matmul(self.A - np.matmul(K,self.C),self.S) 
-        print("new state:" , m)
-        print("new covariance:", S)
+        #print("new state:" , m)
+        #print("new covariance:", S)
+    
+
 
