@@ -52,7 +52,7 @@ class RobotMove:
         self.side = 0.01
         self.theta = 0
         self.believe_states = [[self.x, self.y, self.theta]]
-        #self.theta = -math.pi/2
+        # self.theta = -math.pi/2
         self.sensor_limit = 200
 
         distance = 64
@@ -85,7 +85,7 @@ class RobotMove:
             self.v = 0
             self.w = 0
 
-        #next_x, next_y = self.x, self.y
+        # next_x, next_y = self.x, self.y
 
         # check model
         if self.v != 0 or self.w != 0:
@@ -109,8 +109,8 @@ class RobotMove:
             # DRAW LINE MOVE VECTOR
             pygame.display.flip()
 
-            #next_x = M[0]-(ROBOT.get_width()/2)
-            #next_y = M[1]-(ROBOT.get_height()/2)
+            # next_x = M[0]-(ROBOT.get_width()/2)
+            # next_y = M[1]-(ROBOT.get_height()/2)
             next_x = M[0]
             next_y = M[1]
             # print("-")
@@ -129,6 +129,20 @@ class RobotMove:
 
 # -------------------------------------------------------------------------------
 # Raycasting
+
+
+def find_beacon(screen, beacons):
+
+    sensor_x = player_robot.x+(ROBOT.get_width()/2)
+    sensor_y = player_robot.y+(ROBOT.get_height()/2)
+
+    beacon_lines = []
+    collision_offset = 32
+
+    for bc in range(len(beacons)):
+        if int(math.sqrt((beacons[bc].y-sensor_y)**2 + (beacons[bc].x-sensor_x)**2))-collision_offset < 150:
+            beacon_lines.append(pygame.draw.line(screen, (255, 130, 100),
+                                                 (sensor_x, sensor_y), (beacons[bc].x, beacons[bc].y), 3))
 
 
 def cast_rays(screen, beacons):
@@ -398,8 +412,8 @@ while run:
     player_robot.draw(environment.map)
 
     # if (round(time.time() % 1, 1) == 0.10):
-    cast_rays(SCREEN, beacons)
-
+    # cast_rays(SCREEN, beacons)
+    find_beacon(SCREEN, beacons)
     # ---
 
     pygame.display.update()
