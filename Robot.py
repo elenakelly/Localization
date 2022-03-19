@@ -2,6 +2,7 @@ from re import I
 import pygame
 import numpy as np
 import math
+import Filter
 
 # initialisation of game
 pygame.font.init()
@@ -34,17 +35,16 @@ def blit_rotate_center(win, image, top_left, angle):
 # Robot movement
 class RobotMove:
         def __init__(self):
-            self.trail_set = []
             self.img = self.IMG  # image
             self.x = self.START_POS[0]  # starting x
             self.y = self.START_POS[1]  # starting y
-
-            
+               
             self.v = 0  #translated velocity
             self.w = 0 #angular velocitty
             self.speed = 1
             self.side = 0.001
             self.theta = 0
+            self.believe_states = [[self.x, self.y, self.theta]]
             #self.theta = -math.pi/2
             self.sensor_limit = 200
 
@@ -188,14 +188,16 @@ class Envir:
         self.black = (0, 0, 0)
         self.white = (255, 255, 255)
         self.gray = (49, 60, 60)
+        self.blue = (20, 80, 155)
+        self.red = (255, 0, 0)
         # map_dims
         self.height = dimension[0]
         self.width = dimension[1]
         # window setting
         self.map = pygame.display.set_mode((self.width, self.height))
-        # trail
+        # trails
         self.trail_set = []
-        self.dust_remaining = 0
+        self.dash_trail_set = []
     
     # line route
     def trail(self, pos):
@@ -205,6 +207,15 @@ class Envir:
         if self.trail_set.__sizeof__() > 10000:
             self.trail_set.pop(0)
         self.trail_set.append(pos)
+    
+    #estimated line route
+    def dotted_line(self,pos):
+        for i in range(0, len(self.dash_trail_set)-1):
+                pygame.draw.line(self.map, self.black, (self.dash_trail_set[i][0]+5, self.dash_trail_set[i][1]+5),
+                                (self.dash_trail_set[i+1][0]+1, self.dash_trail_set[i+1][1]+1))
+        if self.dash_trail_set.__sizeof__() > 1000000:
+            self.dash_trail_set.pop(0)
+        self.dash_trail_set.append(pos)
     
     # y and x axis
     def robot_frame(self, pos, rotation):
@@ -238,6 +249,17 @@ class Envir:
         (350, 500),(350,750),(32,746),(32,54),(568,54),(568,746)]
         for beacons in wall_list2:
             pygame.draw.circle(SCREEN,(0, 0, 0),beacons, 7)
+    
+    def draw_elipses(self):
+        x, y = player_robot.x, player_robot.y
+        width, height = 2 * x / 10, 2 * y / 10
+        surface = pygame.Surface((width, height))
+        size = (0, 0, width, height)
+        # drawing an ellipse
+        pygame.draw.ellipse(surface, self.blue, size)
+        rotate = [int(x - width / 2), int(y - height / 2)]
+        SCREEN.blit(surface, rotate)
+
 
 
 
@@ -320,8 +342,16 @@ while run:
         wall.draw(SCREEN)
         environment.robot_frame(
         (player_robot.x, player_robot.y), player_robot.theta)
+
+    #actual robot trajectory
     environment.trail((player_robot.x + (ROBOT.get_width()/2),
                        player_robot.y + (ROBOT.get_height()/2)))
+
+    #estimated robot trajectory
+    environment.dotted_line((player_robot.x + (ROBOT.get_width()/2),
+                       player_robot.y + (ROBOT.get_height()/2)))
+    #show intermediate estimates of potition of covariance
+    environment.draw_elipses()
     player_robot.upd_rect()
     player_robot.draw(environment.map)
 
