@@ -1,4 +1,3 @@
-from re import I, U
 import numpy as np
 
 class KalmanFilter:
@@ -10,7 +9,8 @@ class KalmanFilter:
         #prediction/transition matrix
         self.A = np.eye(3) 
         #control matrix
-        self.B = [[dt*np.cos(self.theta), 0],[dt*np.sin(self.theta), 0],[ 0 , dt]] 
+        self.B = [[dt*np.cos(self.theta), 0],
+        [dt*np.sin(self.theta), 0],[0 , dt]] 
         #sensor information
         self.C = np.eye(3)
         #sensor noise, initialize with small value
@@ -26,21 +26,21 @@ class KalmanFilter:
     def prediction(self):
 
         #state prediction
-        self.m = np.dot(self.A , self.state) + np.dot(self.B , self.u)
+        self.m = np.matmul(self.A , self.state) + np.matmul(self.B , self.u)
         #covariance prediction
-        self.S = np.dot(np.dot(self.A, self.S), self.A) + self.R
+        self.S = np.matmul(np.matmul(self.A, self.S), self.A) + self.R
 
     def correction(self,z):
         #get z and C from the sensors
         # z = [x,y,theta]
 
-        a = np.dot(np.dot(self.C,S), self.C) + self.Q
+        a = np.matmul(np.matmul(self.C,S), self.C) + self.Q
         a1 = np.linalg.matrix_power(a, -1)
-        K = np.dot(np.dot(S,self.C), a1)
+        K = np.matmul(np.matmul(S,self.C), a1)
         #new state
-        m = self.m +np.dot(K,(z - np.dot(self.C,self.m)))
+        m = self.m +np.matmul(K,(z - np.matmul(self.C,self.m)))
         #new covariance
-        S = np.dot(self.A - np.dot(K,self.C),self.S) 
+        S = np.matmul(self.A - np.matmul(K,self.C),self.S) 
         print("new state:" , m)
         print("new covariance:", S)
 

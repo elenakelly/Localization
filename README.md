@@ -9,6 +9,19 @@ Nikolaos Ntantis i6273751 -  </br>
 Ioannis Montesantos i6292068 -  </br>
 
 
+TODO: </br>
+motion move
+filter
+beacons
+sensors
+localization
+visuals in time steps
+add noise to movement
+add noise to sensors
+
+
+
+
 • Point-based features </br>
 • No walls, no collision with features</br>
 • Omnidirectional sensor for feature detection</br>
