@@ -3,11 +3,12 @@ import pygame
 import numpy as np
 import math
 import random
-import Filter
+from Filter import KalmanFilter
 import time
 
 # initialisation of game
 pygame.font.init()
+
 
 # images
 BACKGROUND = pygame.transform.scale(
@@ -42,14 +43,14 @@ def blit_rotate_center(win, image, top_left, angle):
 
 
 class RobotMove:
-    def __init__(self):
+    def __init__(self,error_mov=0, error_rot=0):
         self.img = self.IMG  # image
         self.x = self.START_POS[0]  # starting x
         self.y = self.START_POS[1]  # starting y
 
         self.v = 0  # translated velocity
         self.w = 0  # angular velocitty
-        self.speed = 1
+        self.speed = 0.5
         self.side = 0.01
         self.theta = 0
         # self.theta = -math.pi/2
@@ -67,6 +68,8 @@ class RobotMove:
         #localization stuff
         self.movement_error = 0.1
         self.believe_states = [[self.x, self.y, self.theta]]
+        self.error_mov = error_mov
+        self.error_rot = error_rot
 
     # draw and rotate the image
 
@@ -127,19 +130,20 @@ class RobotMove:
         self.rotated = pygame.transform.rotozoom(
             self.img, math.degrees(self.theta), 1)
     
-    def movement_noise(self):
-        if random.random() < self.movement_error:
-            if (self.x > 0.01 or self.y > 0.01):
-                self.x += (random.random() - 0.5) * 0.01
-            elif self.x > 0.01:
-                self.x += (random.random() - 0.5) * 0.01
-
-        if random.random() < self.movement_error:
-            if (self.x < -0.01 or self.y  < -0.01):
-                self.y  += (random.random() - 0.5) * 0.01
-            elif self.x < -0.01:
-                self.y  += (random.random() - 0.5) * 0.01
-    
+        if self.error_mov !=0:
+            if random.random() < self.movement_error:
+                if self.v != 0 and self.w != 0:
+                    self.x += (np.random.normal(self.error_mov[0], self.error_mov[1]))
+            if random.random() < self.movement_error:
+                if self.v != 0 and self.w != 0:
+                    self.y += (np.random.normal(self.error_mov[0], self.error_mov[1]))
+        if self.error_rot != 0:
+            if random.random() < self.movement_error:
+                if self.v == 0 and self.w == 0:
+                    self.theta =  self.theta
+                else:
+                    self.theta += (np.random.normal(self.error_rot[0], self.error_rot[1]))
+        
     def upd_rect(self):
         self.rect.x = self.x
         self.rect.y = self.y
@@ -514,6 +518,12 @@ FPS = 60
 beacons = [Beacon(30, 170, 7, SCREEN, 0), Beacon(400, 170, 7, SCREEN, 1), Beacon(170, 330, 7, SCREEN, 2), Beacon(570, 330, 7, SCREEN, 3), Beacon(170, 580, 7, SCREEN, 4),
            Beacon(350, 500, 7, SCREEN, 5), Beacon(350, 750, 7, SCREEN, 6), Beacon(32, 746, 7, SCREEN, 7), Beacon(32, 54, 7, SCREEN, 8), Beacon(568, 54, 7, SCREEN, 9), Beacon(568, 746, 7, SCREEN, 10)]
 
+error_mov = [0, 0.1]
+error_rot = [0,0.1]
+player_robot = PlayRobot(error_mov, error_rot)
+player_robot_motion_prediction = PlayRobot()
+
+filter = KalmanFilter(dt,(player_robot.x,player_robot.y,player_robot.theta),player_robot.v,player_robot.w)
 
 # simulation loop
 while run:
@@ -548,8 +558,7 @@ while run:
                        player_robot.y + (ROBOT.get_height()/2)))
 
     # estimated robot trajectory
-    environment.dotted_line((player_robot.x + (ROBOT.get_width()/2),
-                             player_robot.y + (ROBOT.get_height()/2)))
+
     # show intermediate estimates of potition of covariance
     environment.draw_elipses()
     player_robot.upd_rect()
@@ -562,8 +571,21 @@ while run:
     if predicted_position:
         pygame.draw.circle(SCREEN, (100, 10, 50),
                            (predicted_position[0], predicted_position[1]), 5)
-    # ---
+    
 
+    localization = filter.localization(predicted_position)
+    # ---
+   
+    player_robot_motion_prediction.x = filter.predictiontrack[-1][0]
+    player_robot_motion_prediction.y = filter.predictiontrack[-1][1]
+    player_robot_motion_prediction.theta = filter.predictiontrack[-1][2]
+    
+    environment.dotted_line((player_robot_motion_prediction.x+ (ROBOT.get_width()/2) ,
+                                player_robot_motion_prediction.y+ (ROBOT.get_width()/2) ))
+    
+    
+    
+    
     pygame.display.update()
 
 # exit the game
