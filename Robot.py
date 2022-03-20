@@ -41,7 +41,7 @@ def blit_rotate_center(win, image, top_left, angle):
 
 
 class RobotMove:
-    def __init__(self):
+    def __init__(self, error_mov=0, error_rot=0):
         self.img = self.IMG  # image
         self.x = self.START_POS[0]  # starting x
         self.y = self.START_POS[1]  # starting y
@@ -63,6 +63,8 @@ class RobotMove:
 
         self.rect = pygame.Rect(
             self.x, self.y, ROBOT.get_width(), ROBOT.get_height())
+        self.error_mov = error_mov
+        self.error_rot = error_rot
 
     # draw and rotate the image
 
@@ -99,6 +101,15 @@ class RobotMove:
                  [dt*math.sin(self.theta), 0],
                  [0, dt]]
             c = [self.v, self.w]
+
+            # TODO change how we add error (to normal distribution)
+            #error
+            #TODO are my assumptions about rot and mov correct?
+            if self.error_mov !=0:
+                c[0] += np.random.normal(self.error_mov[0], self.error_mov[1])
+            if self.error_rot != 0:
+                c[1] += np.random.normal(self.error_rot[0], self.error_rot[1])
+
             rotation = np.dot(b, c)
             M = a + rotation
 
@@ -366,7 +377,11 @@ wall_list = [Wall(30, 170, 370, 5, False),
              Wall(0, HEIGHT - wall_pixel_offset, WIDTH, wall_pixel_offset, True)]
 
 # the robot
-player_robot = PlayRobot()
+# TODO make these parameters that can be changed
+error_mov = [0, 0.1]
+erro_rot = [0,0.1]
+player_robot = PlayRobot(error_mov, erro_rot)
+player_robot_motion_prediction = PlayRobot()
 
 # enviroment prints
 environment = Envir([800, 600])
@@ -408,6 +423,7 @@ while run:
 
     # run the robot
     activate = player_robot.move(key, dt)
+    activate_2 = player_robot_motion_prediction.move(key, dt)
 
     # visualize objects
     environment.draw(SCREEN, images, player_robot)
@@ -418,17 +434,19 @@ while run:
         environment.robot_frame(
             (player_robot.x, player_robot.y), player_robot.theta)
 
-    # actual robot trajectory
+    # actual robot trajectory # TODO what dont we update the center once at the beginning?
     environment.trail((player_robot.x + (ROBOT.get_width()/2),
                        player_robot.y + (ROBOT.get_height()/2)))
 
     # estimated robot trajectory
-    environment.dotted_line((player_robot.x + (ROBOT.get_width()/2),
-                             player_robot.y + (ROBOT.get_height()/2)))
+    environment.dotted_line((player_robot_motion_prediction.x + (ROBOT.get_width()/2),
+                             player_robot_motion_prediction.y + (ROBOT.get_height()/2)))
     # show intermediate estimates of potition of covariance
     environment.draw_elipses()
     player_robot.upd_rect()
     player_robot.draw(environment.map)
+
+    player_robot_motion_prediction.upd_rect()
 
     # if (round(time.time() % 1, 1) == 0.10):
     # cast_rays(SCREEN, beacons)
