@@ -139,10 +139,29 @@ def find_beacon(screen, beacons):
     beacon_lines = []
     collision_offset = 32
 
+    feat_vec = []
+
+    pygame.draw.circle(screen, (0, 0, 0), (sensor_x, sensor_y), 10)
     for bc in range(len(beacons)):
-        if int(math.sqrt((beacons[bc].y-sensor_y)**2 + (beacons[bc].x-sensor_x)**2))-collision_offset < 150:
+        r = int(math.sqrt((beacons[bc].y-sensor_y)**2 + (beacons[bc].x-sensor_x)**2))-collision_offset # TODO are we sure we need collision offset?
+        if r < 150:
             beacon_lines.append(pygame.draw.line(screen, (255, 130, 100),
-                                                 (sensor_x, sensor_y), (beacons[bc].x, beacons[bc].y), 3))
+                                             (sensor_x, sensor_y), (beacons[bc].x, beacons[bc].y), 3))
+
+            # TODO can theta be applied to our problem(it doesn't contain values between 0-360)
+            bearing = np.arctan2(beacons[bc].y - sensor_y, beacons[bc].x - sensor_x) - player_robot.theta
+            s_t = beacons[bc].id
+
+            feat_vec.append(np.array([r, bearing, s_t]))
+            #print("φ: ", np.arctan2(beacons[bc].y - sensor_y, beacons[bc].x - sensor_x) - player_robot.theta)
+            #print("θ: ", math.degrees(player_robot.theta))
+
+
+    # TODO later we have to take this info and make a prediction of where the robot is
+
+    #print(feat_vec)
+    return feat_vec
+
 
 
 def cast_rays(screen, beacons):
@@ -413,7 +432,9 @@ while run:
 
     # if (round(time.time() % 1, 1) == 0.10):
     # cast_rays(SCREEN, beacons)
-    find_beacon(SCREEN, beacons)
+    feat_vec = find_beacon(SCREEN, beacons)
+    # TODO check if it is correct
+    #print(feat_vec)
     # ---
 
     pygame.display.update()
