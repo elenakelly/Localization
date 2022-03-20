@@ -19,17 +19,21 @@ class KalmanFilter:
         self.R = np.dot(np.eye(3),0.01) 
         self.u = [v,w]
         #previous coveriance, #initialize with small values
-        self.S = np.dot(np.eye(3),0.01) 
+        self.S = np.dot(np.eye(3),0.001) 
         #get z and C from the sensors
-        print(self.C)
+        self.predictiontrack = [(state[0],state[1])]
+        
       
-    def prediction(self):
+    def localization(self,z):
+
+        #-----prediction-----
+
         #state prediction
         self.m = np.matmul(self.A , self.state) + np.matmul(self.B , self.u)
         #covariance prediction
         self.S = np.matmul(np.matmul(self.A, np.transpose(self.S)), self.A) + self.R
 
-    def correction(self,z):
+        #------correction-----
         #get z and C from the sensors
         # z = [x,y,theta]
         a = np.matmul(np.matmul(self.C,S), np.transpose(self.C)) + self.Q
@@ -41,6 +45,12 @@ class KalmanFilter:
         S = np.matmul(self.A - np.matmul(K,self.C),self.S) 
         #print("new state:" , m)
         #print("new covariance:", S)
+
+        #------visualize-----
+        self.predictiontrack.append = [(m[0],m[1])]
+        self.state = m
+        self.S = S
+
     
 
 
