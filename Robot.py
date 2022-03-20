@@ -523,7 +523,7 @@ error_rot = [0,0.1]
 player_robot = PlayRobot(error_mov, error_rot)
 player_robot_motion_prediction = PlayRobot()
 
-filter = KalmanFilter(dt,(player_robot.x,player_robot.y,player_robot.theta),player_robot.v,player_robot.w)
+filter = KalmanFilter(dt,(player_robot.x,player_robot.y,player_robot.theta))
 
 # simulation loop
 while run:
@@ -566,6 +566,7 @@ while run:
 
     # if (round(time.time() % 1, 1) == 0.10):
     # cast_rays(SCREEN, beacons)
+    #filter = KalmanFilter(dt,(player_robot.x,player_robot.y,player_robot.theta),player_robot.v,player_robot.w)
     predicted_position = find_beacon(SCREEN, beacons)
     print(predicted_position)
     if predicted_position:
@@ -573,7 +574,7 @@ while run:
                            (predicted_position[0], predicted_position[1]), 5)
     
 
-    localization = filter.localization(predicted_position)
+    localization = filter.localization(predicted_position,player_robot.v,player_robot.w)
     # ---
    
     player_robot_motion_prediction.x = filter.predictiontrack[-1][0]
@@ -581,7 +582,7 @@ while run:
     player_robot_motion_prediction.theta = filter.predictiontrack[-1][2]
     
     environment.dotted_line((player_robot_motion_prediction.x+ (ROBOT.get_width()/2) ,
-                                player_robot_motion_prediction.y+ (ROBOT.get_width()/2) ))
+                                player_robot_motion_prediction.y+ (ROBOT.get_width()/2)))
     
     
     
