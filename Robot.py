@@ -9,7 +9,6 @@ import time
 # initialisation of game
 pygame.font.init()
 
-
 # images
 BACKGROUND = pygame.transform.scale(
     pygame.image.load("images/background.png"), (600, 800))
@@ -28,7 +27,8 @@ MAIN_FONT = pygame.font.SysFont("comicsans", 22)
 SENSORS_FONT = pygame.font.SysFont("comicsans", 12)
 # SENSORS - Divide circumference by number of sensors
 CAST_RAYS = 24
-STEP_ANGLE = (math.pi*2) / CAST_RAYS
+STEP_ANGLE = (math.pi * 2) / CAST_RAYS
+
 
 # image visual rotation
 
@@ -39,11 +39,12 @@ def blit_rotate_center(win, image, top_left, angle):
         center=image.get_rect(topleft=top_left).center)
     win.blit(rotated_image, new_rect.topleft)
 
+
 # Robot movement
 
 
 class RobotMove:
-    def __init__(self,error_mov=0, error_rot=0):
+    def __init__(self, error_mov=0, error_rot=0):
         self.img = self.IMG  # image
         self.x = self.START_POS[0]  # starting x
         self.y = self.START_POS[1]  # starting y
@@ -59,13 +60,13 @@ class RobotMove:
         distance = 64
         # distance between the centers of the two wheels
         self.l = int(ROBOT.get_width())
-        self.changeX = self.x + (self.l/2)
+        self.changeX = self.x + (self.l / 2)
         self.changeY = self.y
 
         self.rect = pygame.Rect(
             self.x, self.y, ROBOT.get_width(), ROBOT.get_height())
-        
-        #localization stuff
+
+        # localization stuff
         self.movement_error = 0.1
         self.believe_states = [[self.x, self.y, self.theta]]
         self.error_mov = error_mov
@@ -96,14 +97,13 @@ class RobotMove:
 
         # check model
         if self.v != 0 or self.w != 0:
-
             # Computation of ICC
-            centerx = self.x+(ROBOT.get_width()/2)
-            centery = self.y+(ROBOT.get_height()/2)
+            centerx = self.x + (ROBOT.get_width() / 2)
+            centery = self.y + (ROBOT.get_height() / 2)
 
             a = [self.x, self.y, self.theta]
-            b = [[dt*math.cos(self.theta), 0],
-                 [dt*math.sin(self.theta), 0],
+            b = [[dt * math.cos(self.theta), 0],
+                 [dt * math.sin(self.theta), 0],
                  [0, dt]]
             c = [self.v, self.w]
             rotation = np.dot(b, c)
@@ -129,8 +129,8 @@ class RobotMove:
 
         self.rotated = pygame.transform.rotozoom(
             self.img, math.degrees(self.theta), 1)
-    
-        if self.error_mov !=0:
+
+        if self.error_mov != 0:
             if random.random() < self.movement_error:
                 if self.v != 0 and self.w != 0:
                     self.x += (np.random.normal(self.error_mov[0], self.error_mov[1]))
@@ -140,23 +140,22 @@ class RobotMove:
         if self.error_rot != 0:
             if random.random() < self.movement_error:
                 if self.v == 0 and self.w == 0:
-                    self.theta =  self.theta
+                    self.theta = self.theta
                 else:
                     self.theta += (np.random.normal(self.error_rot[0], self.error_rot[1]))
-        
+
     def upd_rect(self):
         self.rect.x = self.x
         self.rect.y = self.y
+
 
 # -------------------------------------------------------------------------------
 # Raycasting
 
 
-
 def find_beacon(screen, beacons):
-
-    sensor_x = player_robot.x+(ROBOT.get_width()/2)
-    sensor_y = player_robot.y+(ROBOT.get_height()/2)
+    sensor_x = player_robot.x + (ROBOT.get_width() / 2)
+    sensor_y = player_robot.y + (ROBOT.get_height() / 2)
 
     beacons_in_proximity = []
     collision_offset = 0
@@ -164,18 +163,18 @@ def find_beacon(screen, beacons):
 
     for bc in range(len(beacons)):
         dist = (math.sqrt(
-            (beacons[bc].y-sensor_y)**2 + (beacons[bc].x-sensor_x)**2))-collision_offset
-        if dist < 200:
+            (beacons[bc].y - sensor_y) ** 2 + (beacons[bc].x - sensor_x) ** 2)) - collision_offset
+        if dist < 150:
             pygame.draw.line(screen, (255, 130, 100), (sensor_x,
-                             sensor_y), (beacons[bc].x, beacons[bc].y), 3)
+                                                       sensor_y), (beacons[bc].x, beacons[bc].y), 3)
             # Calc fix
-            fi = math.atan2((beacons[bc].y-sensor_y),
-                            (beacons[bc].x-sensor_x)) - player_robot.theta
+            fi = math.atan2((beacons[bc].y - sensor_y),
+                            (beacons[bc].x - sensor_x)) - player_robot.theta
             beacons_in_proximity.append(
-                (beacons[bc].x, beacons[bc].y, dist+collision_offset, -fi))
+                (beacons[bc].x, beacons[bc].y, dist + collision_offset, -fi))
             # print(beacons[bc].x, beacons[bc].y, dist+collision_offset)
             pygame.draw.circle(screen, (25, 70, 150),
-                               (beacons[bc].x, beacons[bc].y), dist+collision_offset, 2)
+                               (beacons[bc].x, beacons[bc].y), dist + collision_offset, 2)
 
     if len(beacons_in_proximity) == 2:
         x0 = beacons_in_proximity[0][0]
@@ -250,24 +249,24 @@ def find_beacon(screen, beacons):
 
 
 def circle_intersection(screen, x0, y0, r0, x1, y1, r1, find_fi, circle_color, fi0, fi1):
-    d = math.sqrt((x1-x0)**2 + (y1-y0)**2)
+    d = math.sqrt((x1 - x0) ** 2 + (y1 - y0) ** 2)
 
     if d > r0 + r1:
         return (0, 0), (0, 0), (0, 0), (0, 0)
-    elif d < abs(r0-r1):
+    elif d < abs(r0 - r1):
         return (0, 0), (0, 0), (0, 0), (0, 0)
     elif d == 0 and r0 == r1:
         return (0, 0), (0, 0), (0, 0), (0, 0)
     else:
-        a = (r0**2-r1**2+d**2)/(2*d)
-        h = math.sqrt(abs(r0**2-a**2))
-        x2 = x0+a*(x1-x0)/d
-        y2 = y0+a*(y1-y0)/d
-        x3 = x2+h*(y1-y0)/d
-        y3 = y2-h*(x1-x0)/d
+        a = (r0 ** 2 - r1 ** 2 + d ** 2) / (2 * d)
+        h = math.sqrt(abs(r0 ** 2 - a ** 2))
+        x2 = x0 + a * (x1 - x0) / d
+        y2 = y0 + a * (y1 - y0) / d
+        x3 = x2 + h * (y1 - y0) / d
+        y3 = y2 - h * (x1 - x0) / d
 
-        x4 = x2-h*(y1-y0)/d
-        y4 = y2+h*(x1-x0)/d
+        x4 = x2 - h * (y1 - y0) / d
+        y4 = y2 + h * (x1 - x0) / d
 
         # pygame.draw.circle(screen, circle_color, (x3, y3), 5)
         # pygame.draw.circle(screen, circle_color, (x4, y4), 5)
@@ -275,14 +274,14 @@ def circle_intersection(screen, x0, y0, r0, x1, y1, r1, find_fi, circle_color, f
         # print("Fi0 ", fi0)
         # print("Fi1 ", fi1)
 
-        fi03 = math.atan2((y0-y3),
-                          (x0-x3)) - player_robot.theta
-        fi13 = math.atan2((y1-y3),
-                          (x1-x3)) - player_robot.theta
-        fi04 = math.atan2((y0-y4),
-                          (x0-x4)) - player_robot.theta
-        fi14 = math.atan2((y1-y4),
-                          (x1-x4)) - player_robot.theta
+        fi03 = math.atan2((y0 - y3),
+                          (x0 - x3)) - player_robot.theta
+        fi13 = math.atan2((y1 - y3),
+                          (x1 - x3)) - player_robot.theta
+        fi04 = math.atan2((y0 - y4),
+                          (x0 - x4)) - player_robot.theta
+        fi14 = math.atan2((y1 - y4),
+                          (x1 - x4)) - player_robot.theta
 
         # print("FI pot pos 1 w beacon 1 ", fi03)
         # print("FI pot pos 1 w beacon 2 ", fi13)
@@ -292,14 +291,12 @@ def circle_intersection(screen, x0, y0, r0, x1, y1, r1, find_fi, circle_color, f
         return (int(x3), int(y3)), (int(x4), int(y4)), (-fi03, -fi13), (-fi04, -fi14)
 
 
-
 def cast_rays(screen, beacons):
-
     all_sensors = []
     sensor_results = []
 
-    sensor_x = player_robot.x+(ROBOT.get_width()/2)
-    sensor_y = player_robot.y+(ROBOT.get_height()/2)
+    sensor_x = player_robot.x + (ROBOT.get_width() / 2)
+    sensor_y = player_robot.y + (ROBOT.get_height() / 2)
 
     temp_angle = 0
 
@@ -341,7 +338,8 @@ def cast_rays(screen, beacons):
         sensor_distance = 200
         if clipped_line:
             temp_sensor_distance = int(
-                math.sqrt((clipped_line[0][1]-sensor_y)**2 + (clipped_line[0][0]-sensor_x)**2))-collision_offset
+                math.sqrt(
+                    (clipped_line[0][1] - sensor_y) ** 2 + (clipped_line[0][0] - sensor_x) ** 2)) - collision_offset
             if temp_sensor_distance < sensor_distance:
                 sensor_distance = temp_sensor_distance
 
@@ -402,18 +400,18 @@ class Envir:
 
     # line route
     def trail(self, pos):
-        for i in range(0, len(self.trail_set)-1):
+        for i in range(0, len(self.trail_set) - 1):
             pygame.draw.line(self.map, self.white, (self.trail_set[i][0], self.trail_set[i][1]),
-                             (self.trail_set[i+1][0], self.trail_set[i+1][1]))
+                             (self.trail_set[i + 1][0], self.trail_set[i + 1][1]))
         if self.trail_set.__sizeof__() > 10000:
             self.trail_set.pop(0)
         self.trail_set.append(pos)
 
     # estimated line route
     def dotted_line(self, pos):
-        for i in range(0, len(self.dash_trail_set)-1):
-            pygame.draw.line(self.map, self.black, (self.dash_trail_set[i][0]+5, self.dash_trail_set[i][1]+5),
-                             (self.dash_trail_set[i+1][0]+1, self.dash_trail_set[i+1][1]+1))
+        for i in range(0, len(self.dash_trail_set) - 1):
+            pygame.draw.line(self.map, self.black, (self.dash_trail_set[i][0] + 5, self.dash_trail_set[i][1] + 5),
+                             (self.dash_trail_set[i + 1][0] + 1, self.dash_trail_set[i + 1][1] + 1))
         if self.dash_trail_set.__sizeof__() > 1000000:
             self.dash_trail_set.pop(0)
         self.dash_trail_set.append(pos)
@@ -422,11 +420,11 @@ class Envir:
     def robot_frame(self, pos, rotation):
         n = 80
         # centerx, centery = pos
-        centerx = pos[0]+(ROBOT.get_width()/2)
-        centery = pos[1]+(ROBOT.get_height()/2)
-        x_axis = (centerx + n*np.cos(rotation), centery + n*np.sin(rotation))
-        y_axis = (centerx + n*np.cos(rotation+np.pi/2),
-                  centery + n*np.sin(rotation+np.pi/2))
+        centerx = pos[0] + (ROBOT.get_width() / 2)
+        centery = pos[1] + (ROBOT.get_height() / 2)
+        x_axis = (centerx + n * np.cos(rotation), centery + n * np.sin(rotation))
+        y_axis = (centerx + n * np.cos(rotation + np.pi / 2),
+                  centery + n * np.sin(rotation + np.pi / 2))
         pygame.draw.line(self.map, self.black, (centerx, centery), x_axis, 3)
         pygame.draw.line(self.map, self.black, (centerx, centery), y_axis, 3)
 
@@ -438,7 +436,8 @@ class Envir:
 
         # display left, right velocity and theta on screen
         vel_text = MAIN_FONT.render(
-            f"v = {round(player_robot.v,2)} w = {round(player_robot.w,2)} theta = {int(np.degrees(player_robot.theta))}", 1, self.white)
+            f"v = {round(player_robot.v, 2)} w = {round(player_robot.w, 2)} theta = {int(np.degrees(player_robot.theta))}",
+            1, self.white)
         screen.blit(vel_text, (10, HEIGHT - vel_text.get_height() - 40))
         # display robot on screen
         player_robot.draw(screen)
@@ -463,10 +462,10 @@ class Envir:
     def setWalls():
         wall_pixel_offset = 42
         rectWallL = pygame.Rect(0, 0, wall_pixel_offset, HEIGHT)
-        rectWallR = pygame.Rect(WIDTH-wall_pixel_offset, 0,
+        rectWallR = pygame.Rect(WIDTH - wall_pixel_offset, 0,
                                 wall_pixel_offset, HEIGHT)
-        rectWallT = pygame.Rect(0,  0, WIDTH, wall_pixel_offset)
-        rectWallB = pygame.Rect(0, HEIGHT-wall_pixel_offset,
+        rectWallT = pygame.Rect(0, 0, WIDTH, wall_pixel_offset)
+        rectWallB = pygame.Rect(0, HEIGHT - wall_pixel_offset,
                                 WIDTH, wall_pixel_offset)
         return [rectWallL, rectWallR, rectWallT, rectWallB]
 
@@ -515,15 +514,17 @@ FPS = 60
 # for beacons in wall_list2:
 #     pygame.draw.circle(SCREEN,(0, 0, 0),beacons,7)
 
-beacons = [Beacon(30, 170, 7, SCREEN, 0), Beacon(400, 170, 7, SCREEN, 1), Beacon(170, 330, 7, SCREEN, 2), Beacon(570, 330, 7, SCREEN, 3), Beacon(170, 580, 7, SCREEN, 4),
-           Beacon(350, 500, 7, SCREEN, 5), Beacon(350, 750, 7, SCREEN, 6), Beacon(32, 746, 7, SCREEN, 7), Beacon(32, 54, 7, SCREEN, 8), Beacon(568, 54, 7, SCREEN, 9), Beacon(568, 746, 7, SCREEN, 10)]
+beacons = [Beacon(30, 170, 7, SCREEN, 0), Beacon(400, 170, 7, SCREEN, 1), Beacon(170, 330, 7, SCREEN, 2),
+           Beacon(570, 330, 7, SCREEN, 3), Beacon(170, 580, 7, SCREEN, 4),
+           Beacon(350, 500, 7, SCREEN, 5), Beacon(350, 750, 7, SCREEN, 6), Beacon(32, 746, 7, SCREEN, 7),
+           Beacon(32, 54, 7, SCREEN, 8), Beacon(568, 54, 7, SCREEN, 9), Beacon(568, 746, 7, SCREEN, 10)]
 
 error_mov = [0, 0.1]
-error_rot = [0,0.1]
+error_rot = [0, 0.1]
 player_robot = PlayRobot(error_mov, error_rot)
 player_robot_motion_prediction = PlayRobot()
 
-filter = KalmanFilter(dt,(player_robot.x,player_robot.y,player_robot.theta))
+filter = KalmanFilter(dt, (player_robot.x, player_robot.y, player_robot.theta), error_mov[1], error_rot[1])
 
 # simulation loop
 while run:
@@ -543,7 +544,9 @@ while run:
 
     # run the robot
     activate = player_robot.move(key, dt)
-
+    activate_2 = player_robot_motion_prediction.move(key, dt)
+    if activate_2 :
+        filter.m = activate_2
     # visualize objects
     environment.draw(SCREEN, images, player_robot)
     for bc in beacons:
@@ -554,8 +557,8 @@ while run:
             (player_robot.x, player_robot.y), player_robot.theta)
 
     # actual robot trajectory
-    environment.trail((player_robot.x + (ROBOT.get_width()/2),
-                       player_robot.y + (ROBOT.get_height()/2)))
+    environment.trail((player_robot.x + (ROBOT.get_width() / 2),
+                       player_robot.y + (ROBOT.get_height() / 2)))
 
     # estimated robot trajectory
 
@@ -566,27 +569,27 @@ while run:
 
     # if (round(time.time() % 1, 1) == 0.10):
     # cast_rays(SCREEN, beacons)
-    #filter = KalmanFilter(dt,(player_robot.x,player_robot.y,player_robot.theta),player_robot.v,player_robot.w)
+    # filter = KalmanFilter(dt,(player_robot.x,player_robot.y,player_robot.theta),player_robot.v,player_robot.w)
     predicted_position = find_beacon(SCREEN, beacons)
-    print(predicted_position)
+
     if predicted_position:
         pygame.draw.circle(SCREEN, (100, 10, 50),
                            (predicted_position[0], predicted_position[1]), 5)
-    
 
-    localization = filter.localization(predicted_position,player_robot.v,player_robot.w)
+    localization = filter.localization(predicted_position, player_robot_motion_prediction.v, player_robot_motion_prediction.w,
+                                       [player_robot_motion_prediction.x, player_robot_motion_prediction.y, player_robot_motion_prediction.theta])
     # ---
-   
+
+    print("pred: ", player_robot_motion_prediction.x, player_robot_motion_prediction.y)
+    print("sensor", [filter.predictiontrack[-1][0], filter.predictiontrack[-1][1]])
+
     player_robot_motion_prediction.x = filter.predictiontrack[-1][0]
     player_robot_motion_prediction.y = filter.predictiontrack[-1][1]
     player_robot_motion_prediction.theta = filter.predictiontrack[-1][2]
-    
-    environment.dotted_line((player_robot_motion_prediction.x+ (ROBOT.get_width()/2) ,
-                                player_robot_motion_prediction.y+ (ROBOT.get_width()/2)))
-    
-    
-    
-    
+
+    environment.dotted_line((player_robot_motion_prediction.x,
+                             player_robot_motion_prediction.y))
+
     pygame.display.update()
 
 # exit the game
