@@ -2,6 +2,7 @@ from re import I
 import pygame
 import numpy as np
 import math
+import random
 import Filter
 import time
 
@@ -51,7 +52,6 @@ class RobotMove:
         self.speed = 1
         self.side = 0.01
         self.theta = 0
-        self.believe_states = [[self.x, self.y, self.theta]]
         # self.theta = -math.pi/2
         self.sensor_limit = 200
 
@@ -63,6 +63,10 @@ class RobotMove:
 
         self.rect = pygame.Rect(
             self.x, self.y, ROBOT.get_width(), ROBOT.get_height())
+        
+        #localization stuff
+        self.movement_error = 0.1
+        self.believe_states = [[self.x, self.y, self.theta]]
 
     # draw and rotate the image
 
@@ -122,7 +126,20 @@ class RobotMove:
 
         self.rotated = pygame.transform.rotozoom(
             self.img, math.degrees(self.theta), 1)
+    
+    def movement_noise(self):
+        if random.random() < self.movement_error:
+            if (self.x > 0.01 or self.y > 0.01):
+                self.x += (random.random() - 0.5) * 0.01
+            elif self.x > 0.01:
+                self.x += (random.random() - 0.5) * 0.01
 
+        if random.random() < self.movement_error:
+            if (self.x < -0.01 or self.y  < -0.01):
+                self.y  += (random.random() - 0.5) * 0.01
+            elif self.x < -0.01:
+                self.y  += (random.random() - 0.5) * 0.01
+    
     def upd_rect(self):
         self.rect.x = self.x
         self.rect.y = self.y
