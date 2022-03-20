@@ -2,7 +2,7 @@ import numpy as np
 
 class KalmanFilter:
     
-    def __init__(self,dt,state,v,w):
+    def __init__(self,dt,state):
         #state = [x,y,theta]  
         self.state = state
         self.theta = state[2]
@@ -17,17 +17,17 @@ class KalmanFilter:
         self.Q = np.dot(np.eye(3),0.01) #TODO change when 
         #process noise, initialize with small values
         self.R = np.dot(np.eye(3),0.01) 
-        self.u = [v,w]
+        
         #previous coveriance, #initialize with small values
         self.S = np.dot(np.eye(3),0.001) 
         #get z and C from the sensors
         self.predictiontrack = [(state[0],state[1])]
         
       
-    def localization(self,z):
+    def localization(self,z,v,w):
 
         #-----prediction-----
-
+        self.u = [v,w]
         #state prediction
         self.m = np.matmul(self.A , self.state) + np.matmul(self.B , self.u)
         #covariance prediction
