@@ -160,7 +160,7 @@ def find_beacon(screen, beacons):
     for bc in range(len(beacons)):
         dist = (math.sqrt(
             (beacons[bc].y - sensor_y) ** 2 + (beacons[bc].x - sensor_x) ** 2)) - collision_offset
-        if dist < 150:
+        if dist < sensor_range:
             pygame.draw.line(screen, (0,255,0), (sensor_x,
                                                        sensor_y), (beacons[bc].x, beacons[bc].y), 3)
             # Calc fix
@@ -521,6 +521,8 @@ error_mov = [0, 0.1]
 error_rot = [0, 0.1]
 sensor_mov = [0, 0.1]
 sensor_rot = [0, 0.1]
+global sensor_range
+sensor_range = 150
 
 
 player_robot = PlayRobot(error_mov, error_rot)
