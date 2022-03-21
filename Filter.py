@@ -1,4 +1,5 @@
 import numpy as np
+import math
 
 
 class KalmanFilter:
@@ -27,27 +28,29 @@ class KalmanFilter:
         self.m = self.state
         print(sigma_mov)
         print(sigma_rot)
+        
+        #ellipses stuff
+        self.history =[]
+        self.location = []
+        self.counter = 0
 
     def localization(self, z, v, w, m):
 
         # -----prediction-----
-        '''self.u = [v, w]
-        # state prediction
-        self.m = np.matmul(self.A, self.state) + np.matmul(self.B, self.u)'''
-
-        #nick added
         self.m = m
-
 
         # covariance prediction
         self.S = np.matmul(np.matmul(self.A, self.S), np.transpose(self.A)) + self.R
 
         # ------correction-----
-        # get z and C from the sensors
-        # z = [x,y,theta]
         a = np.matmul(np.matmul(self.C, self.S), np.transpose(self.C)) + self.Q
         a1 = np.linalg.matrix_power(a, -1)
         K = np.matmul(np.matmul(self.S, np.transpose(self.C)), a1)
+        # draw every 20 step
+        self.counter += 1
+        if self.counter % 20 == 0:
+            self.history.append(self.ellipses())
+            self.location.append((self.state[0], self.state[1]))
         # new state
         if z == None:
             m = self.m
@@ -65,11 +68,31 @@ class KalmanFilter:
             self.m = m
             return 1
         # new covariance
+           
 
-        # print("new state:" , m)
-        # print("new covariance:", S)
+       
+    def ellipses(self):
+    # ------visualize-----
+        a = self.S[0][0]
+        b = self.S[0][1]
+        c = self.S[1][1]
+        l1 = (a + c) / 2 + np.sqrt(((a - c) / 2) ** 2 + b ** 2)
+        l2 = (a + c) / 2 - np.sqrt(((a - c) / 2) ** 2 + b ** 2)
+        if b == 0 and a >= c:
+            theta = 0
+        if b == 0 and a < c:
+            theta = np.pi / 2
+        else:
+            theta = math.atan2(l1 - a, b)    
+        x =  np.sqrt(abs(l1)) 
+        y = np.sqrt(abs(l2))
+        ellipse = (x, y, math.degrees(theta))
+        return ellipse
 
-        # ------visualize-----
+
+
+
+
 
 
 
