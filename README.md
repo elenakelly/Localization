@@ -9,7 +9,7 @@ Nikolaos Ntantis i6273751 - localization, noise to movement, noise to sensor  </
 Ioannis Montesantos i6292068 - sensors, beacons, calculation of landmark's distances</br>
 
 
-Visuals Representaion:</br>
+Visuals Representation:</br>
 Ellipse =  shows intermediate estimates of position and covariance</br>
 Dotted line = estimated robot trajectory</br>
 Solid line = actual robot trajectory</br>
@@ -18,7 +18,7 @@ Green line = sensor range between robot and beacon</br>
 
 
 Discription:</br>
-• Velocity-based motion model (𝑢 = 𝑣, 𝜔 𝑇)</br>
+• Velocity-based motion model (𝑢 = (𝑣, 𝜔)𝑇)</br>
 • Control robot with key board (W=increment 𝑣, S=decrement 𝑣, A=decrement 𝜔 D=increment 𝜔, X=stop)</br>
 • No walls, no collision with features</br>
 • Point-based features </br>
