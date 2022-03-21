@@ -109,10 +109,6 @@ class RobotMove:
             rotation = np.dot(b, c)
             M = a + rotation
 
-            # TEMP DRAW LINE TOWARDS ICC
-            pygame.draw.line(SCREEN, (255, 255, 0), (centerx, centery),
-                             (M[0], M[1]), 3)
-
             # DRAW LINE MOVE VECTOR
             pygame.display.flip()
 
@@ -131,7 +127,6 @@ class RobotMove:
             self.img, math.degrees(self.theta), 1)
 
         if self.error_mov != 0:
-            print("inside here")
             if random.random() < self.movement_error:
                 if self.v != 0 and self.w != 0:
                     self.x += (np.random.normal(self.error_mov[0], self.error_mov[1]))
@@ -527,10 +522,11 @@ error_rot = [0, 0.1]
 sensor_mov = [0, 0.1]
 sensor_rot = [0, 0.1]
 
+
 player_robot = PlayRobot(error_mov, error_rot)
 player_robot_motion_prediction = PlayRobot()
 
-filter = KalmanFilter(dt, (player_robot.x, player_robot.y, player_robot.theta), error_mov[1], error_rot[1])
+filter = KalmanFilter(dt, (player_robot.x, player_robot.y, player_robot.theta), error_mov[1], error_rot[1], sensor_mov[1], sensor_rot[1])
 
 # simulation loop
 while run:
