@@ -17,7 +17,7 @@ Black point = beacons/landmarks/features</br>
 Green line = sensor range between robot and beacon</br>
 
 
-Discription:
+Discription:</br>
 • Velocity-based motion model (𝑢 = 𝑣, 𝜔 𝑇)</br>
 • Control robot with key board (W=increment 𝑣, S=decrement 𝑣, A=decrement 𝜔 D=increment 𝜔, X=stop)</br>
 • No walls, no collision with features</br>
