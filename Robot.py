@@ -432,9 +432,14 @@ class Envir:
 
         # display left, right velocity and theta on screen
         vel_text = MAIN_FONT.render(
-            f"v = {round(player_robot.v, 2)} w = {round(player_robot.w, 2)} theta = {int(np.degrees(player_robot.theta))}",
+            f"x = {round(player_robot.x, 2)} y = {round(player_robot.y, 2)} theta = {int(math.degrees(player_robot.theta))}",
             1, self.white)
         screen.blit(vel_text, (10, HEIGHT - vel_text.get_height() - 40))
+        vel_text2 = MAIN_FONT.render(
+            f"pr x = {round(player_robot_motion_prediction.x, 2)} pr y = {round(player_robot_motion_prediction.y, 2)} pr theta = {int(math.degrees(player_robot_motion_prediction.theta))}",
+            1, self.white)
+        screen.blit(vel_text2, (10, HEIGHT - vel_text2.get_height() - 20))
+        
         # display robot on screen
         player_robot.draw(screen)
         # pygame.display.update()
@@ -517,8 +522,8 @@ beacons = [Beacon(30, 170, 7, SCREEN, 0), Beacon(400, 170, 7, SCREEN, 1), Beacon
            Beacon(350, 500, 7, SCREEN, 5), Beacon(350, 750, 7, SCREEN, 6), Beacon(32, 746, 7, SCREEN, 7),
            Beacon(32, 54, 7, SCREEN, 8), Beacon(568, 54, 7, SCREEN, 9), Beacon(568, 746, 7, SCREEN, 10)]
 
-error_mov = [0, 0.1]
-error_rot = [0, 0.1]
+error_mov = [0, 0.2]
+error_rot = [0, 0.3]
 sensor_mov = [0, 0.1]
 sensor_rot = [0, 0.1]
 global sensor_range

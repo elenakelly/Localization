@@ -52,7 +52,7 @@ class KalmanFilter:
         K = np.matmul(np.matmul(self.S, np.transpose(self.C)), a1)
         # draw every 20 step
         self.counter += 1
-        if self.counter % 20 == 0:
+        if self.counter % 30 == 0:
             self.history.append(self.ellipses())
             self.location.append((self.state[0], self.state[1]))
         # new state
@@ -76,7 +76,7 @@ class KalmanFilter:
     def ellipses(self):
         # ------visualize-----
         a = self.S[0][0]
-        b = self.S[0][1]
+        b = self.S[2][2]
         c = self.S[1][1]
         l1 = (a + c) / 2 + np.sqrt(((a - c) / 2) ** 2 + b ** 2)
         l2 = (a + c) / 2 - np.sqrt(((a - c) / 2) ** 2 + b ** 2)
