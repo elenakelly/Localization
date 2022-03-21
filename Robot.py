@@ -166,7 +166,7 @@ def find_beacon(screen, beacons):
         dist = (math.sqrt(
             (beacons[bc].y - sensor_y) ** 2 + (beacons[bc].x - sensor_x) ** 2)) - collision_offset
         if dist < 150:
-            pygame.draw.line(screen, (255, 130, 100), (sensor_x,
+            pygame.draw.line(screen, (0,255,0), (sensor_x,
                                                        sensor_y), (beacons[bc].x, beacons[bc].y), 3)
             # Calc fix
             fi = math.atan2((beacons[bc].y - sensor_y),
@@ -411,7 +411,7 @@ class Envir:
     # estimated line route
     def dotted_line(self, pos):
         for i in range(0, len(self.dash_trail_set) - 1):
-            pygame.draw.line(self.map, self.black, (self.dash_trail_set[i][0] + 5, self.dash_trail_set[i][1] + 5),
+            pygame.draw.line(self.map, (0,255,255), (self.dash_trail_set[i][0] + 5, self.dash_trail_set[i][1] + 5),
                              (self.dash_trail_set[i + 1][0] + 1, self.dash_trail_set[i + 1][1] + 1))
         if self.dash_trail_set.__sizeof__() > 1000000:
             self.dash_trail_set.pop(0)
@@ -450,15 +450,17 @@ class Envir:
         for beacons in wall_list2:
             pygame.draw.circle(SCREEN, (0, 0, 0), beacons, 7)
 
-    def draw_elipses(self):
-        x, y = player_robot.x, player_robot.y
-        width, height = 2 * x / 10, 2 * y / 10
-        surface = pygame.Surface((width, height))
-        size = (0, 0, width, height)
-        # drawing an ellipse
-        pygame.draw.ellipse(surface, self.blue, size)
-        rotate = [int(x - width / 2), int(y - height / 2)]
-        SCREEN.blit(surface, rotate)
+    def draw_ellipses(self,width, height, angle,location):
+        width = width
+        height = height
+        angle = angle
+        x, y = location
+        # transparent surface
+        surface = pygame.Surface((100, 100), pygame.SRCALPHA)
+        size = (50 - width , 50 - height , width * 10, height * 10)
+        pygame.draw.ellipse(surface, (253,203,113), size, 2)
+        rotate = pygame.transform.rotate(surface, angle)
+        SCREEN.blit(rotate, (x - rotate.get_rect().center[0], y - rotate.get_rect().center[1]))
 
     def setWalls():
         wall_pixel_offset = 42
@@ -522,7 +524,7 @@ beacons = [Beacon(30, 170, 7, SCREEN, 0), Beacon(400, 170, 7, SCREEN, 1), Beacon
 
 error_mov = [0, 0.1]
 error_rot = [0, 0.1]
-sensor_mov = [0, 0.1  ]
+sensor_mov = [0, 0.1]
 sensor_rot = [0, 0.1]
 
 player_robot = PlayRobot(error_mov, error_rot)
@@ -566,8 +568,7 @@ while run:
 
     # estimated robot trajectory
 
-    # show intermediate estimates of potition of covariance
-    environment.draw_elipses()
+
     player_robot.upd_rect()
     player_robot.draw(environment.map)
 
@@ -596,6 +597,9 @@ while run:
 
     environment.dotted_line((player_robot_motion_prediction.x,
                              player_robot_motion_prediction.y))
+    # show intermediate estimates of potition of covariance
+    for i in range(len(filter.history)):
+            environment.draw_ellipses(filter.history[i][0],filter.history[i][1],filter.history[i][2],filter.location[i])
 
     pygame.display.update()
 
