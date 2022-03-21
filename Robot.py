@@ -131,6 +131,7 @@ class RobotMove:
             self.img, math.degrees(self.theta), 1)
 
         if self.error_mov != 0:
+            print("inside here")
             if random.random() < self.movement_error:
                 if self.v != 0 and self.w != 0:
                     self.x += (np.random.normal(self.error_mov[0], self.error_mov[1]))
@@ -521,6 +522,9 @@ beacons = [Beacon(30, 170, 7, SCREEN, 0), Beacon(400, 170, 7, SCREEN, 1), Beacon
 
 error_mov = [0, 0.1]
 error_rot = [0, 0.1]
+sensor_mov = [0, 0.1  ]
+sensor_rot = [0, 0.1]
+
 player_robot = PlayRobot(error_mov, error_rot)
 player_robot_motion_prediction = PlayRobot()
 
@@ -579,9 +583,12 @@ while run:
     localization = filter.localization(predicted_position, player_robot_motion_prediction.v, player_robot_motion_prediction.w,
                                        [player_robot_motion_prediction.x, player_robot_motion_prediction.y, player_robot_motion_prediction.theta])
     # ---
+    #add sensor error
+    if localization != 0 :
+        filter.predictiontrack[-1][0] += np.random.normal(sensor_mov[0], sensor_mov[1])
+        filter.predictiontrack[-1][1] += np.random.normal(sensor_mov[0], sensor_mov[1])
+        filter.predictiontrack[-1][2] += np.random.normal(sensor_rot[0], sensor_rot[1])
 
-    print("pred: ", player_robot_motion_prediction.x, player_robot_motion_prediction.y)
-    print("sensor", [filter.predictiontrack[-1][0], filter.predictiontrack[-1][1]])
 
     player_robot_motion_prediction.x = filter.predictiontrack[-1][0]
     player_robot_motion_prediction.y = filter.predictiontrack[-1][1]
