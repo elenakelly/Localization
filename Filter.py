@@ -54,6 +54,7 @@ class KalmanFilter:
             self.predictiontrack.append([m[0], m[1], m[2]])
 
             self.state = m
+            return 0
         else:
             m = self.m + np.matmul(K, (z - np.matmul(self.C, self.m)))
             S = np.matmul(self.A - np.matmul(K, self.C), self.S)
@@ -62,6 +63,7 @@ class KalmanFilter:
             self.state = m
             self.S = S
             self.m = m
+            return 1
         # new covariance
 
         # print("new state:" , m)
