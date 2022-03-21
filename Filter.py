@@ -4,7 +4,11 @@ import math
 
 class KalmanFilter:
 
-    def __init__(self, dt, state, sigma_mov, sigma_rot):
+    def __init__(self, dt, state, sigma_mov, sigma_rot, sigma_ser_mov, sigma_ser_rot):
+        '''sigma_mov = 0.2
+        sigma_rot =
+        sigma_ser_mov =
+        sigma_ser_rot = '''
         # state = [x,y,theta]
         self.state = state
         self.theta = state[2]
@@ -16,21 +20,21 @@ class KalmanFilter:
         # sensor information
         self.C = np.eye(3)
         # sensor noise, initialize with small value
-        self.Q = np.dot(np.eye(3), 1) * np.array([sigma_mov, sigma_mov, sigma_rot])  # TODO change when
+        self.Q = np.dot(np.eye(3), 1) * np.array([sigma_ser_mov, sigma_ser_mov, sigma_ser_rot])  # TODO change when
         # process noise, initialize with small values
         self.R = np.dot(np.eye(3), 1) * np.array([sigma_mov, sigma_mov, sigma_rot])
         # previous coveriance, #initialize with small values
-        self.S = np.eye(3) * np.array([sigma_mov, sigma_mov, sigma_rot])
+        self.S = np.eye(3) * 0.001
         # get z and C from the sensors
         self.predictiontrack = [(state[0], state[1])]
 
-        #nick added
+        # nick added
         self.m = self.state
         print(sigma_mov)
         print(sigma_rot)
-        
-        #ellipses stuff
-        self.history =[]
+
+        # ellipses stuff
+        self.history = []
         self.location = []
         self.counter = 0
 
@@ -68,11 +72,9 @@ class KalmanFilter:
             self.m = m
             return 1
         # new covariance
-           
 
-       
     def ellipses(self):
-    # ------visualize-----
+        # ------visualize-----
         a = self.S[0][0]
         b = self.S[0][1]
         c = self.S[1][1]
@@ -83,12 +85,11 @@ class KalmanFilter:
         if b == 0 and a < c:
             theta = np.pi / 2
         else:
-            theta = math.atan2(l1 - a, b)    
-        x =  np.sqrt(abs(l1)) 
+            theta = math.atan2(l1 - a, b)
+        x = np.sqrt(abs(l1))
         y = np.sqrt(abs(l2))
         ellipse = (x, y, math.degrees(theta))
         return ellipse
-
 
 
 
