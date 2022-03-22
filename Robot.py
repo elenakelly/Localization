@@ -161,8 +161,8 @@ def find_beacon(screen, beacons):
         dist = (math.sqrt(
             (beacons[bc].y - sensor_y) ** 2 + (beacons[bc].x - sensor_x) ** 2)) - collision_offset
         if dist < sensor_range:
-            pygame.draw.line(screen, (0,255,0), (sensor_x,
-                                                       sensor_y), (beacons[bc].x, beacons[bc].y), 3)
+            pygame.draw.line(screen, (0, 255, 0), (sensor_x,
+                                                   sensor_y), (beacons[bc].x, beacons[bc].y), 3)
             # Calc fix
             fi = math.atan2((beacons[bc].y - sensor_y),
                             (beacons[bc].x - sensor_x)) - player_robot.theta
@@ -406,7 +406,7 @@ class Envir:
     # estimated line route
     def dotted_line(self, pos):
         for i in range(0, len(self.dash_trail_set) - 1):
-            pygame.draw.line(self.map, (0,255,255), (self.dash_trail_set[i][0] + 5, self.dash_trail_set[i][1] + 5),
+            pygame.draw.line(self.map, (0, 255, 255), (self.dash_trail_set[i][0] + 5, self.dash_trail_set[i][1] + 5),
                              (self.dash_trail_set[i + 1][0] + 1, self.dash_trail_set[i + 1][1] + 1))
         if self.dash_trail_set.__sizeof__() > 1000000:
             self.dash_trail_set.pop(0)
@@ -439,7 +439,7 @@ class Envir:
             f"pr x = {round(player_robot_motion_prediction.x, 2)} pr y = {round(player_robot_motion_prediction.y, 2)} pr theta = {int(math.degrees(player_robot_motion_prediction.theta))}",
             1, self.white)
         screen.blit(vel_text2, (10, HEIGHT - vel_text2.get_height() - 20))
-        
+
         # display robot on screen
         player_robot.draw(screen)
         # pygame.display.update()
@@ -450,15 +450,15 @@ class Envir:
         for beacons in wall_list2:
             pygame.draw.circle(SCREEN, (0, 0, 0), beacons, 7)
 
-    def draw_ellipses(self,width, height, angle,location):
+    def draw_ellipses(self, width, height, angle, location):
         width = width
         height = height
         angle = angle
         x, y = location
         # transparent surface
         surface = pygame.Surface((100, 100), pygame.SRCALPHA)
-        size = (50 - width , 50 - height , width * 10, height * 10)
-        pygame.draw.ellipse(surface, (253,203,113), size, 2)
+        size = (50 - width, 50 - height, width * 10, height * 10)
+        pygame.draw.ellipse(surface, (253, 203, 113), size, 2)
         rotate = pygame.transform.rotate(surface, angle)
         SCREEN.blit(rotate, (x - rotate.get_rect().center[0], y - rotate.get_rect().center[1]))
 
@@ -522,18 +522,18 @@ beacons = [Beacon(30, 170, 7, SCREEN, 0), Beacon(400, 170, 7, SCREEN, 1), Beacon
            Beacon(350, 500, 7, SCREEN, 5), Beacon(350, 750, 7, SCREEN, 6), Beacon(32, 746, 7, SCREEN, 7),
            Beacon(32, 54, 7, SCREEN, 8), Beacon(568, 54, 7, SCREEN, 9), Beacon(568, 746, 7, SCREEN, 10)]
 
-error_mov = [0, 0.2]
-error_rot = [0, 0.3]
-sensor_mov = [0, 0.1]
-sensor_rot = [0, 0.1]
+error_mov = [0, 0.001]
+error_rot = [0, 0.001]
+sensor_mov = [0, 0.001]
+sensor_rot = [0, 0.001]
 global sensor_range
 sensor_range = 150
-
 
 player_robot = PlayRobot(error_mov, error_rot)
 player_robot_motion_prediction = PlayRobot()
 
-filter = KalmanFilter(dt, (player_robot.x, player_robot.y, player_robot.theta), error_mov[1], error_rot[1], sensor_mov[1], sensor_rot[1])
+filter = KalmanFilter(dt, (player_robot.x, player_robot.y, player_robot.theta), error_mov[1], error_rot[1],
+                      sensor_mov[1], sensor_rot[1])
 
 # simulation loop
 while run:
@@ -554,7 +554,7 @@ while run:
     # run the robot
     activate = player_robot.move(key, dt)
     activate_2 = player_robot_motion_prediction.move(key, dt)
-    if activate_2 :
+    if activate_2:
         filter.m = activate_2
     # visualize objects
     environment.draw(SCREEN, images, player_robot)
@@ -571,7 +571,6 @@ while run:
 
     # estimated robot trajectory
 
-
     player_robot.upd_rect()
     player_robot.draw(environment.map)
 
@@ -584,15 +583,16 @@ while run:
         pygame.draw.circle(SCREEN, (100, 10, 50),
                            (predicted_position[0], predicted_position[1]), 5)
 
-    localization = filter.localization(predicted_position, player_robot_motion_prediction.v, player_robot_motion_prediction.w,
-                                       [player_robot_motion_prediction.x, player_robot_motion_prediction.y, player_robot_motion_prediction.theta])
+    localization = filter.localization(predicted_position, player_robot_motion_prediction.v,
+                                       player_robot_motion_prediction.w,
+                                       [player_robot_motion_prediction.x, player_robot_motion_prediction.y,
+                                        player_robot_motion_prediction.theta])
     # ---
-    #add sensor error
-    if localization != 0 :
+    # add sensor error
+    if localization != 0:
         filter.predictiontrack[-1][0] += np.random.normal(sensor_mov[0], sensor_mov[1])
         filter.predictiontrack[-1][1] += np.random.normal(sensor_mov[0], sensor_mov[1])
         filter.predictiontrack[-1][2] += np.random.normal(sensor_rot[0], sensor_rot[1])
-
 
     player_robot_motion_prediction.x = filter.predictiontrack[-1][0]
     player_robot_motion_prediction.y = filter.predictiontrack[-1][1]
@@ -602,7 +602,7 @@ while run:
                              player_robot_motion_prediction.y))
     # show intermediate estimates of potition of covariance
     for i in range(len(filter.history)):
-            environment.draw_ellipses(filter.history[i][0],filter.history[i][1],filter.history[i][2],filter.location[i])
+        environment.draw_ellipses(filter.history[i][0], filter.history[i][1], filter.history[i][2], filter.location[i])
 
     pygame.display.update()
 
