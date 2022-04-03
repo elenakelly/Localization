@@ -1,5 +1,4 @@
-# Localization
-* Main task: "Self-localization of mobile robot with Kalman Filter"</br>
+# Self-localization of mobile robot with Kalman Filter"
 
 
 CODE DIVISION : </br>
@@ -36,7 +35,7 @@ In order to use the code you need to install Numpy, Math and Pygame packages
     import pygame
     import math
    ```
- You can start by running the
+ You can start by running the file:
  ### `Robot`
 
 ## Contributors
