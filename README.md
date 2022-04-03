@@ -36,9 +36,11 @@ In order to use the code you need to install Numpy, Math and Pygame packages
     import pygame
     import math
    ```
- To start, run the ###`Robot` file 
+ You can start by running the
+ ### `Robot`
 
 ## Contributors
 Elena Kane </br>
 Nikolaos Ntantis </br>
 Ioannis Montesantos 
+
