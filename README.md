@@ -1,4 +1,4 @@
-# Self-localization of mobile robot with Kalman Filter"
+# Self-localization of mobile robot with Kalman Filter
 
  Simulator programmed in Python with PyGame.
  You can start by running the file:
