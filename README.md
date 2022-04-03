@@ -27,3 +27,17 @@ Discription:</br>
 • Bearing and distance estimate</br>
 • Known correspondence</br>
 • Track pose with Kalman Filter</br>
+
+## Installation
+The program is in Python <br />
+In order to use the code you need to install Numpy, Math and Pygame packages
+   ```sh
+    import numpy as np
+    import pygame
+    import math
+   ```
+
+## Contributors
+Elena Kane </br>
+Nikolaos Ntantis </br>
+Ioannis Montesantos 
